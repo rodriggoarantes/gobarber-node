@@ -1,0 +1,14 @@
+{
+  "name": "gobarber",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/rodriggoarantes/gobarber-node.git",
+  "author": "rodrigo.arantes <rodrigo.arantes@totvs.com.br>",
+  "license": "MIT",
+  "scripts": {
+    "start" : "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
