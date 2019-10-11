@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import { startOfHour, parseISO, isBefore, format } from 'date-fns';
+import { startOfHour, parseISO, isBefore, format, subHours } from 'date-fns';
 import pt from 'date-fns/locale/pt-BR';
 import File from '../models/File';
 import Appointment from '../models/Appointment';
@@ -7,8 +7,22 @@ import User from '../models/User';
 import Notification from '../schemas/Notification';
 
 class AppointmentController {
+  /**
+   * Busca a lista de agendamentos existentes para o
+   * usuario.
+   */
   async index(req, res) {
     const { page = 1, pageSize = 10 } = req.query;
+
+    // usuario informado é do tipo prestador
+    const isProvider = await User.findOne({
+      where: { id: req.userId, provider: true }
+    });
+    if (isProvider) {
+      return res
+        .status(401)
+        .json({ message: 'Usuario informado não é um cliente' });
+    }
 
     const appointments = await Appointment.findAll({
       where: { user_id: req.userId, canceled_at: null },
@@ -34,8 +48,6 @@ class AppointmentController {
 
   /**
    * Criar novo agendamento
-   * @param {request} req
-   * @param {response} res
    */
   async store(req, res) {
     const schema = Yup.object().shape({
@@ -97,6 +109,38 @@ class AppointmentController {
       content: `Novo agendamento de ${user.name}, para dia ${formattedDate}`,
       user: provider_id
     });
+
+    return res.json(appointment);
+  }
+
+  /**
+   * Cancela um agendamento
+   */
+  async delete(req, res) {
+    const appointment = await Appointment.findByPk(req.params.id);
+
+    if (!appointment) {
+      return res.status(401).json({
+        message: 'Agendamento não encontrado.'
+      });
+    }
+
+    if (appointment.user_id !== req.userId) {
+      return res.status(401).json({
+        message: 'Usuario não pode alterar este agendamento'
+      });
+    }
+
+    const dateWithSub = subHours(appointment.date, 2);
+    if (isBefore(dateWithSub, new Date())) {
+      return res.status(401).json({
+        message:
+          'Cancelamento só pode ser realizado duas horas antes do agendamento.'
+      });
+    }
+
+    appointment.canceled_at = new Date();
+    await appointment.save();
 
     return res.json(appointment);
   }
