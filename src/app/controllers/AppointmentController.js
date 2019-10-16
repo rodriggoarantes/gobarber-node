@@ -6,6 +6,9 @@ import Appointment from '../models/Appointment';
 import User from '../models/User';
 import Notification from '../schemas/Notification';
 
+import Queue from '../../lib/Queue';
+import CancelationMail from '../jobs/CancelationMail';
+
 class AppointmentController {
   /**
    * Busca a lista de agendamentos existentes para o
@@ -155,8 +158,8 @@ class AppointmentController {
     appointment.canceled_at = new Date();
     await appointment.save();
 
-    // envia o email confirmando o cancelamento
-
+    // agenda o envio de email confirmando o cancelamento
+    await Queue.add(CancelationMail.key, { appointment });
 
     return res.json(appointment);
   }

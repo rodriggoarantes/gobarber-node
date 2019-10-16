@@ -6,7 +6,8 @@
   "author": "rodrigo.arantes <rodrigo.arantes@totvs.com.br>",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "queue": "nodemon src/queue.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
