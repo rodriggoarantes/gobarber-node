@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import path from 'path';
 import express from 'express';
 import Youch from 'youch';
@@ -38,8 +40,11 @@ class App {
 
   exceptionHandler() {
     this.server.use(async (err, req, res, next) => {
-      const errors = await new Youch(err, req).toJSON();
-      return res.status(500).json(errors);
+      if (process.env.NODE_ENV === 'develop') {
+        const errors = await new Youch(err, req).toJSON();
+        return res.status(500).json(errors);
+      }
+      return res.status(500).json({ message: 'Erro interno não esperado' });
     });
   }
 }
