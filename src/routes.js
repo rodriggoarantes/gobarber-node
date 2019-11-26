@@ -17,7 +17,7 @@ const routes = new Router();
 const upload = multer(multerConfig);
 
 routes.post('/sessions', SessionController.store);
-routes.post('/register', UserController.store);
+routes.post('/providers', UserController.store);
 
 routes.use(authMiddleware);
 
